@@ -67,25 +67,18 @@ def get_bm25_top_chunks(query, chunks, top_k=3):
     scores.sort(key=lambda x: x[0], reverse=True)
     return [c for s, c in scores[:top_k]]
 
-def rebuild_pdf_index():
-    pdf_chunks = []
-    if os.path.exists(PDF_DIR):
-        pdf_files = [f for f in os.listdir(PDF_DIR) if f.endswith(".pdf")]
-        for filename in pdf_files:
-            try:
-                from pypdf import PdfReader
-                reader = PdfReader(os.path.join(PDF_DIR, filename))
-                for i, page in enumerate(reader.pages):
-                    text = page.extract_text()
-                    if text and text.strip():
-                        pdf_chunks.append({
-                            "filename": filename,
-                            "page": i + 1,
-                            "text": text.strip()
-                        })
-            except Exception as e:
-                pass
-    st.session_state.pdf_chunks = pdf_chunks
+def load_pdf_index():
+    import pickle
+    index_file = "pdf_index.pkl"
+    if os.path.exists(index_file):
+        try:
+            with open(index_file, 'rb') as f:
+                st.session_state.pdf_chunks = pickle.load(f)
+        except Exception as e:
+            st.error(f"Failed to load index: {e}")
+            st.session_state.pdf_chunks = []
+    else:
+        st.session_state.pdf_chunks = []
 
 def render_obsidian_graph():
     chunks = st.session_state.get("pdf_chunks", [])
@@ -169,40 +162,31 @@ def render_citations(text, sources):
     for idx, src in enumerate(sources):
         # Match [1], \[1\], [ 1 ], etc. to handle LLM markdown escaping
         pattern = re.compile(rf'\\?\[\s*{idx + 1}\s*\\?\]')
-        safe_filename = src["filename"].replace('"', '&quot;')
         
-        # Create a Gemini-style short name
+        # Create a clean short name
         short_name = src["filename"].replace(".pdf", "").replace(".txt", "")
         if len(short_name) > 18:
             short_name = short_name[:15] + "..."
             
-        html_pill = f'<a href="#source-{idx+1}" class="citation-pill" title="{safe_filename} (Page {src["page"]})">📄 {short_name}</a>'
-        text = pattern.sub(html_pill, text)
+        # Use native markdown instead of HTML for inline citations
+        pill = f"**[[{idx+1}] 📄 {short_name}]**"
+        text = pattern.sub(pill, text)
         
-    # Append a professional Gemini-style Sources block at the bottom
-    sources_html = """
-    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Sources</div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-    """
+    return text
+
+def display_sources_ui(sources, msg_id=0):
+    if not sources:
+        return
+        
+    st.markdown("###### Sources")
+    # Generate unique suffix using Zero-width spaces to avoid DuplicateWidgetID warnings
+    # when identical sources are cited in different chat messages.
+    unique_suffix = "\u200b" * msg_id if isinstance(msg_id, int) else "\u200b\u200b\u200b\u200b\u200b"
+    
     for idx, src in enumerate(sources):
-        safe_text = src['text'][:250].replace('\n', ' ').replace('"', '&quot;')
-        safe_filename = src['filename'].replace('"', '&quot;')
-        sources_html += f"""
-            <div id='source-{idx+1}' style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; transition: background 0.2s;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-                    <div style="font-size: 13.5px; font-weight: 600; color: #111827;">
-                        <span style="display: inline-block; background: #e5e7eb; color: #374151; border-radius: 50%; width: 18px; height: 18px; text-align: center; line-height: 18px; font-size: 10px; margin-right: 6px;">{idx+1}</span>
-                        📄 {safe_filename}
-                    </div>
-                    <div style="font-size: 12px; font-weight: 500; color: #6b7280; background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">Page {src['page']}</div>
-                </div>
-                <div style="font-size: 12.5px; color: #4b5563; line-height: 1.5; font-style: italic;">"{safe_text}..."</div>
-            </div>
-        """
-    sources_html += "</div></div>"
-        
-    return text + sources_html
+        with st.expander(f"[{idx+1}] 📄 {src['filename']} (Page {src['page']}){unique_suffix}"):
+            safe_text = src['text'][:400].replace('\n', ' ')
+            st.caption(f"_{safe_text}..._")
 
 def extract_followups(text):
     lines = text.split('\n')
@@ -621,7 +605,7 @@ if "pdf_cache" not in st.session_state:
     st.session_state.pdf_cache = {}
 
 if "pdf_chunks" not in st.session_state:
-    st.session_state.pdf_chunks = []
+    load_pdf_index()
 
 if "active_page" not in st.session_state:
     st.session_state.active_page = "chat"
@@ -865,10 +849,10 @@ if st.session_state.active_page == "settings":
     )
     st.session_state.pdf_rag_enabled = pdf_rag
     
-    if st.button("🔄  Re-Index Documents", use_container_width=True):
-        with st.spinner("Re-indexing documents..."):
-            rebuild_pdf_index()
-        st.success("Document index rebuilt!")
+    if st.button("🔄  Reload Pre-Computed Index", use_container_width=True):
+        with st.spinner("Loading index..."):
+            load_pdf_index()
+        st.success("Document index loaded from disk!")
         st.rerun()
         
     total_pages = len(st.session_state.get("pdf_chunks", []))
@@ -956,6 +940,7 @@ elif st.session_state.active_page == "chat":
                 if message["role"] == "assistant" and "sources" in message and message["sources"]:
                     rendered_text = render_citations(display_content, message["sources"])
                     st.markdown(rendered_text, unsafe_allow_html=True)
+                    display_sources_ui(message["sources"], msg_id=i)
                 else:
                     st.markdown(display_content)
                     
@@ -1094,6 +1079,8 @@ elif st.session_state.active_page == "chat":
 
                     clean_final, final_followups = extract_followups(full_response)
                     response_placeholder.markdown(render_citations(clean_final, retrieved_sources), unsafe_allow_html=True)
+                    if retrieved_sources:
+                        display_sources_ui(retrieved_sources, msg_id="current")
 
                 except requests.exceptions.HTTPError as e:
                     full_response = (

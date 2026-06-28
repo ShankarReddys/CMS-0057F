@@ -1,11 +1,17 @@
 # CMS-0057F Health Plan AI Assistant
 
 ## Project Overview
-This project provides a local, privacy-preserving AI Assistant designed specifically for U.S. Health Plans to navigate and implement the **CMS Interoperability and Prior Authorization Final Rule (CMS-0057-F)**. 
-
-By leveraging local LLMs (via Ollama) and a Retrieval-Augmented Generation (RAG) pipeline against your own indexed PDF library, this chatbot helps Health Plan IT/technical staff and business/operations staff quickly find grounded, cited answers regarding compliance dates, API specifications (Patient Access, Provider Access, Payer-to-Payer, DRLS), and prior authorization requirements without sending sensitive patient or proprietary data to the cloud.
+This project provides a local, privacy-preserving AI assistant built for Health Plans to query and explore the **CMS-0057F Interoperability and Prior Authorization Final Rule**. This application leverages offline LLMs via Ollama and a blazing fast in-memory BM25/TF-IDF text retrieval engine to provide accurate, cited answers from hundreds of pages of federal guidelines without sending your data to the cloud.
 
 This version runs entirely locally and does not require OpenAI API credits or external internet access for inference.
+
+## UI Demo
+
+![Application Screenshot](assets/chat_demo.png)
+
+![App Animation Demo](assets/ui_demo.webp)
+
+*The user interface dynamically renders markdown, collapsible source citations, and context-aware follow up questions.*
 
 ## What is Ollama?
 Ollama allows you to run open-source LLMs locally on your own laptop.
