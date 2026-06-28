@@ -1,9 +1,11 @@
-# AI Chat for PDFs
+# CMS-0057F Health Plan AI Assistant
 
-## Project
-Build a ChatGPT-like chatbot using Python, Streamlit and Ollama.
+## Project Overview
+This project provides a local, privacy-preserving AI Assistant designed specifically for U.S. Health Plans to navigate and implement the **CMS Interoperability and Prior Authorization Final Rule (CMS-0057-F)**. 
 
-This version does not require OpenAI API credits.
+By leveraging local LLMs (via Ollama) and a Retrieval-Augmented Generation (RAG) pipeline against your own indexed PDF library, this chatbot helps Health Plan IT/technical staff and business/operations staff quickly find grounded, cited answers regarding compliance dates, API specifications (Patient Access, Provider Access, Payer-to-Payer, DRLS), and prior authorization requirements without sending sensitive patient or proprietary data to the cloud.
+
+This version runs entirely locally and does not require OpenAI API credits or external internet access for inference.
 
 ## What is Ollama?
 Ollama allows you to run open-source LLMs locally on your own laptop.

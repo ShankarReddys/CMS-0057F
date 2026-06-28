@@ -165,11 +165,21 @@ def render_obsidian_graph():
 def render_citations(text, sources):
     if not sources:
         return text
+        
     for idx, src in enumerate(sources):
-        marker = f"[{idx + 1}]"
-        html_pill = f'<span class="citation-pill" title="{src["filename"]} (Page {src["page"]})">{idx + 1}</span>'
-        text = text.replace(marker, html_pill)
-    return text
+        # Match [1], \[1\], [ 1 ], etc. to handle LLM markdown escaping
+        pattern = re.compile(rf'\\?\[\s*{idx + 1}\s*\\?\]')
+        safe_filename = src["filename"].replace('"', '&quot;')
+        html_pill = f'<span class="citation-pill" title="{safe_filename} (Page {src["page"]})">{idx + 1}</span>'
+        text = pattern.sub(html_pill, text)
+        
+    # Append a Gemini-style Sources block at the bottom
+    sources_md = "\n\n---\n**Sources:**\n"
+    for idx, src in enumerate(sources):
+        safe_text = src['text'][:250].replace('\n', ' ')
+        sources_md += f"{idx + 1}. **{src['filename']}** (Page {src['page']})  \n<span style='font-size: 0.85em; color: #6b7280;'>\"{safe_text}...\"</span>\n\n"
+        
+    return text + sources_md
 
 def extract_followups(text):
     lines = text.split('\n')
@@ -599,9 +609,8 @@ KNOWLEDGE SOURCE
   rather than guessing.
 
 GROUNDING & CITATION RULES
-- Every substantive claim must trace to the retrieved excerpts. After each answer,
-  cite sources as [document name, p.X]. If multiple documents support a point, cite
-  each.
+- Every substantive claim must trace to the retrieved excerpts.
+- Cite your sources inline using numerical bracket markers corresponding to the context number (e.g. [1], [2]). Do not use literal text like [document name, p.X].
 - If the retrieved context does not contain the answer, state clearly: "I don't have
   that in the indexed documents," then suggest where the user might look or what to
   add to the library. Never fabricate citations, page numbers, or requirements.
@@ -915,11 +924,6 @@ elif st.session_state.active_page == "chat":
                         if cols[idx+1].button(f"{q} ↗", key=f"hist_followup_{i}_{idx}", use_container_width=True, type="tertiary"):
                             st.session_state.messages.append({"role": "user", "content": q})
                             st.rerun()
-                if message["role"] == "assistant" and "sources" in message and message["sources"]:
-                    with st.expander("🔍 Reference Sources Used"):
-                        for src in message["sources"]:
-                            st.markdown(f"- **{src['filename']}** (Page {src['page']})")
-                            st.caption(f"\"{src['text'][:250]}...\"")
 
     # -----------------------------
     # Chat Input
