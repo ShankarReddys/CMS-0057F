@@ -170,6 +170,17 @@ def render_citations(text, sources):
         text = text.replace(marker, html_pill)
     return text
 
+def extract_followups(text):
+    lines = text.split('\n')
+    cleaned_lines = []
+    followups = []
+    for line in lines:
+        if line.strip().startswith('[FOLLOWUP]'):
+            followups.append(line.replace('[FOLLOWUP]', '').strip())
+        else:
+            cleaned_lines.append(line)
+    return '\n'.join(cleaned_lines), followups
+
 
 # -----------------------------
 # Page Config
@@ -690,11 +701,7 @@ with st.sidebar:
             st.session_state.active_page = "chat"
             st.rerun()
 
-    if st.session_state.active_page != "graph":
-        if st.button("📈 Graph View", use_container_width=True, key="graph_nav_btn"):
-            st.session_state.active_page = "graph"
-            st.rerun()
-            
+
     if st.session_state.active_page != "settings":
         if st.button("⚙  Settings", use_container_width=True, key="settings_nav_btn"):
             st.session_state.active_page = "settings"
@@ -865,6 +872,7 @@ elif st.session_state.active_page == "graph":
     # Stop execution so chat doesn't render below
     st.stop()
 
+
 # -----------------------------
 # Chat Interface (Main)
 # -----------------------------
@@ -880,11 +888,24 @@ elif st.session_state.active_page == "chat":
         key = f"user_msg_{i}" if message["role"] == "user" else f"assistant_msg_{i}"
         with st.chat_message(message["role"], avatar=avatar):
             with st.container(key=key):
+                display_content = message["content"]
+                followups = []
+                if message["role"] == "assistant":
+                    display_content, followups = extract_followups(message["content"])
+                    
                 if message["role"] == "assistant" and "sources" in message and message["sources"]:
-                    rendered_text = render_citations(message["content"], message["sources"])
+                    rendered_text = render_citations(display_content, message["sources"])
                     st.markdown(rendered_text, unsafe_allow_html=True)
                 else:
-                    st.markdown(message["content"])
+                    st.markdown(display_content)
+                    
+                if followups:
+                    st.write("")
+                    cols = st.columns(len(followups))
+                    for idx, (col, q) in enumerate(zip(cols, followups)):
+                        if col.button(q, key=f"hist_followup_{i}_{idx}", use_container_width=True):
+                            st.session_state.messages.append({"role": "user", "content": q})
+                            st.rerun()
                 if message["role"] == "assistant" and "sources" in message and message["sources"]:
                     with st.expander("🔍 Reference Sources Used"):
                         for src in message["sources"]:
@@ -921,14 +942,14 @@ elif st.session_state.active_page == "chat":
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
-            if st.button("✉️  Draft a professional email\nrequesting time off", use_container_width=True):
-                prompt = "Write a professional email to request time off"
+            if st.button("✉️  What is Consent management requirements for CMS-0057F?", use_container_width=True):
+                prompt = "What is Consent management requirements for CMS-0057F?"
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
         with col2:
-            if st.button("💡  Brainstorm 5 creative ideas\nfor a science project", use_container_width=True):
-                prompt = "Give me 5 creative ideas for a science project"
+            if st.button("💡  What are specifications for Patient API and Provider API?", use_container_width=True):
+                prompt = "What are specifications for Patient API and Provider API?"
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
@@ -942,7 +963,8 @@ elif st.session_state.active_page == "chat":
     # Generate Assistant Response
     # -----------------------------
     if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
-        messages_for_ollama = [{"role": "system", "content": st.session_state.system_prompt}]
+        sys_prompt = st.session_state.system_prompt + "\n\nCRITICAL INSTRUCTION: At the very end of your response, you MUST provide 1 to 3 suggested follow-up questions that the user could ask next. Format each question on a new line starting exactly with '[FOLLOWUP] '."
+        messages_for_ollama = [{"role": "system", "content": sys_prompt}]
         retrieved_sources = []
         
         # Retrieve & Inject Multi-Document PDF context if RAG is enabled
@@ -1000,13 +1022,15 @@ elif st.session_state.active_page == "chat":
                                 if "message" in chunk and "content" in chunk["message"]:
                                     content = chunk["message"]["content"]
                                     full_response += content
-                                    rendered_temp = render_citations(full_response, retrieved_sources)
+                                    clean_temp, _ = extract_followups(full_response)
+                                    rendered_temp = render_citations(clean_temp, retrieved_sources)
                                     response_placeholder.markdown(rendered_temp + "▌", unsafe_allow_html=True)
 
                                 if chunk.get("done", False):
                                     break
 
-                    response_placeholder.markdown(render_citations(full_response, retrieved_sources), unsafe_allow_html=True)
+                    clean_final, final_followups = extract_followups(full_response)
+                    response_placeholder.markdown(render_citations(clean_final, retrieved_sources), unsafe_allow_html=True)
 
                 except requests.exceptions.HTTPError as e:
                     full_response = (
