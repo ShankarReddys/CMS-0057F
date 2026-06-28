@@ -95,6 +95,22 @@ graph TD
 3. **Retrieval**: When a query is made, it is tokenized and scored against the BM25 index to extract the Top-K most relevant document chunks.
 4. **LLM Engine**: The augmented prompt (containing the system instructions, chat history, user query, and retrieved document context) is sent to a local **Ollama** server, which streams the generated response back to the UI.
 
+## Why Use a BM25 Scoring Engine in RAG?
+
+While many Retrieval-Augmented Generation (RAG) systems rely entirely on dense vector embeddings (which capture broad semantic meaning), incorporating a **BM25 Scoring Engine** provides significant advantages:
+
+- **Exact Keyword Matching**: Dense embeddings often struggle with exact keyword matching (such as specific part numbers, names, or acronyms). BM25 excels at finding exact matches because it is a lexical (keyword-based) search algorithm.
+- **No Embedding Model Required**: BM25 runs purely on term frequencies and doesn't require downloading, loading, or running a separate neural embedding model, which saves significant RAM and compute resources.
+- **Zero-Shot Domain Adaptation**: Semantic embeddings can sometimes fail if they were trained on general data and applied to highly specialized domains (like complex medical or CMS jargon). BM25 works perfectly out-of-the-box regardless of the domain vocabulary.
+- **Fast and Lightweight**: BM25 can be executed entirely in-memory using standard Python libraries, resulting in near-instant indexing and retrieval without needing a dedicated Vector Database like ChromaDB or Pinecone.
+
+## Understanding TF-IDF
+
+**TF-IDF** (Term Frequency-Inverse Document Frequency) is the foundational statistical measure that powers BM25. It evaluates how relevant a word is to a specific document in a collection.
+
+- **Term Frequency (TF)**: Measures how frequently a word appears in a specific text chunk. If a word appears many times, it's likely important to that chunk.
+- **Inverse Document Frequency (IDF)**: Measures how rare or common a word is across *all* chunks. Common words (like "the", "and", "is") receive a very low score, while rare, highly specific words (like "CMS-0057F") receive a high score.
+- **The Benefit**: By multiplying these two metrics together (TF × IDF), the engine can accurately identify chunks of text that are highly specific to the rare keywords in a user's prompt, filtering out the noise of common language. BM25 builds on this by adding non-linear term frequency saturation and document length normalization, making it one of the most robust search algorithms available.
 ## Step 1 — Install Ollama
 
 Download and install Ollama from:
