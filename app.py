@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import streamlit as st
 from streamlit_agraph import agraph, Node, Edge, Config
@@ -175,8 +176,13 @@ def extract_followups(text):
     cleaned_lines = []
     followups = []
     for line in lines:
-        if line.strip().startswith('[FOLLOWUP]'):
-            followups.append(line.replace('[FOLLOWUP]', '').strip())
+        match = re.search(r'\[FOLLOWUP\]\s*(?:[:\-]\s*)?(.*)', line, re.IGNORECASE)
+        if match:
+            clean_q = match.group(1).strip()
+            # Strip markdown formatting like bold/italics and leading numbers
+            clean_q = re.sub(r'^[\*\-\d\.\s]+', '', clean_q).strip('*_\"\' ')
+            if clean_q:
+                followups.append(clean_q)
         else:
             cleaned_lines.append(line)
     return '\n'.join(cleaned_lines), followups
@@ -901,9 +907,12 @@ elif st.session_state.active_page == "chat":
                     
                 if followups:
                     st.write("")
-                    cols = st.columns(len(followups))
-                    for idx, (col, q) in enumerate(zip(cols, followups)):
-                        if col.button(q, key=f"hist_followup_{i}_{idx}", use_container_width=True):
+                    num_followups = len(followups)
+                    spacer_weight = max(1, 4 - num_followups)
+                    cols = st.columns([spacer_weight] + [1.5] * num_followups)
+                    
+                    for idx, q in enumerate(followups):
+                        if cols[idx+1].button(f"{q} ↗", key=f"hist_followup_{i}_{idx}", use_container_width=True, type="tertiary"):
                             st.session_state.messages.append({"role": "user", "content": q})
                             st.rerun()
                 if message["role"] == "assistant" and "sources" in message and message["sources"]:
