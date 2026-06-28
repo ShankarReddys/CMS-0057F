@@ -7,9 +7,11 @@ This version runs entirely locally and does not require OpenAI API credits or ex
 
 ## UI Demo
 
-![Application Screenshot](assets/chat_demo.png)
+### Landing Page
+![Landing Page](assets/landing_page.png)
 
-![App Animation Demo](assets/ui_demo.webp)
+### Results Page with Sources
+![Results Page](assets/results_page.png)
 
 *The user interface dynamically renders markdown, collapsible source citations, and context-aware follow up questions.*
 
