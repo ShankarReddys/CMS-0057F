@@ -170,23 +170,47 @@ def render_citations(text, sources):
         # Match [1], \[1\], [ 1 ], etc. to handle LLM markdown escaping
         pattern = re.compile(rf'\\?\[\s*{idx + 1}\s*\\?\]')
         safe_filename = src["filename"].replace('"', '&quot;')
-        html_pill = f'<span class="citation-pill" title="{safe_filename} (Page {src["page"]})">{idx + 1}</span>'
+        
+        # Create a Gemini-style short name
+        short_name = src["filename"].replace(".pdf", "").replace(".txt", "")
+        if len(short_name) > 18:
+            short_name = short_name[:15] + "..."
+            
+        html_pill = f'<a href="#source-{idx+1}" class="citation-pill" title="{safe_filename} (Page {src["page"]})">📄 {short_name}</a>'
         text = pattern.sub(html_pill, text)
         
-    # Append a Gemini-style Sources block at the bottom
-    sources_md = "\n\n---\n**Sources:**\n"
+    # Append a professional Gemini-style Sources block at the bottom
+    sources_html = """
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+        <div style="font-size: 13px; font-weight: 600; color: #6b7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Sources</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+    """
     for idx, src in enumerate(sources):
-        safe_text = src['text'][:250].replace('\n', ' ')
-        sources_md += f"{idx + 1}. **{src['filename']}** (Page {src['page']})  \n<span style='font-size: 0.85em; color: #6b7280;'>\"{safe_text}...\"</span>\n\n"
+        safe_text = src['text'][:250].replace('\n', ' ').replace('"', '&quot;')
+        safe_filename = src['filename'].replace('"', '&quot;')
+        sources_html += f"""
+            <div id='source-{idx+1}' style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; transition: background 0.2s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div style="font-size: 13.5px; font-weight: 600; color: #111827;">
+                        <span style="display: inline-block; background: #e5e7eb; color: #374151; border-radius: 50%; width: 18px; height: 18px; text-align: center; line-height: 18px; font-size: 10px; margin-right: 6px;">{idx+1}</span>
+                        📄 {safe_filename}
+                    </div>
+                    <div style="font-size: 12px; font-weight: 500; color: #6b7280; background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">Page {src['page']}</div>
+                </div>
+                <div style="font-size: 12.5px; color: #4b5563; line-height: 1.5; font-style: italic;">"{safe_text}..."</div>
+            </div>
+        """
+    sources_html += "</div></div>"
         
-    return text + sources_md
+    return text + sources_html
 
 def extract_followups(text):
     lines = text.split('\n')
     cleaned_lines = []
     followups = []
     for line in lines:
-        match = re.search(r'\[FOLLOWUP\]\s*(?:[:\-]\s*)?(.*)', line, re.IGNORECASE)
+        # Catch [FOLLOWUP] and \[FOLLOWUP\] and [ FOLLOWUP ]
+        match = re.search(r'\\?\[\s*FOLLOWUP\s*\\?\]\s*(?:[:\-]\s*)?(.*)', line, re.IGNORECASE)
         if match:
             clean_q = match.group(1).strip()
             # Strip markdown formatting like bold/italics and leading numbers
@@ -202,7 +226,7 @@ def extract_followups(text):
 # Page Config
 # -----------------------------
 st.set_page_config(
-    page_title="AI Assistant",
+    page_title="AI ChatGPT for CMS-0057F for HealthPlans",
     page_icon="✦",
     layout="centered"
 )
@@ -231,6 +255,8 @@ footer { visibility: hidden !important; }
 [data-testid="stHeader"] { background-color: transparent !important; }
 [data-testid="stToolbar"] { display: none !important; }
 
+
+
 /* ── Main canvas ── */
 .stApp {
     background-color: #f7f7f8 !important;
@@ -243,9 +269,16 @@ footer { visibility: hidden !important; }
 
 /* ── Sidebar ─────────────────────────────── */
 [data-testid="stSidebar"] {
-    background-color: #ffffff !important;
-    border-right: 1px solid #e8e8e8 !important;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.03) !important;
+    background-color: #111216 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.3) !important;
+}
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label {
+    color: #d1d5db !important;
 }
 [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
     padding-top: 1.25rem !important;
@@ -253,7 +286,7 @@ footer { visibility: hidden !important; }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {
-    color: #6b7280 !important;
+    color: #8b949e !important;
     font-size: 11px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
@@ -261,18 +294,18 @@ footer { visibility: hidden !important; }
     margin-bottom: 0.4rem !important;
 }
 [data-testid="stSidebar"] .stMarkdown p {
-    color: #6b7280 !important;
+    color: #9ca3af !important;
     font-size: 13px !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: #e8e8e8 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
     margin: 0.75rem 0 !important;
 }
 
 /* Sidebar buttons – clean flat rows */
 [data-testid="stSidebar"] .stButton button {
     background-color: transparent !important;
-    color: #374151 !important;
+    color: #d1d5db !important;
     border: none !important;
     padding: 10px 14px !important;
     text-align: left !important;
@@ -285,95 +318,103 @@ footer { visibility: hidden !important; }
     margin-bottom: 2px !important;
     width: 100% !important;
     transform: none !important;
-    transition: background-color 0.15s ease !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
     line-height: 1.4 !important;
 }
 [data-testid="stSidebar"] .stButton button:hover {
-    background-color: #f3f4f6 !important;
-    color: #111827 !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
     transform: none !important;
 }
 /* Active chat row */
 [data-testid="stSidebar"] .stButton button[kind="primary"],
 [data-testid="stSidebar"] .stButton button[data-testid*="primary"] {
-    background-color: #f3f4f6 !important;
-    color: #111827 !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
 }
 /* New-Chat button */
 [data-testid="stSidebar"] .stButton button[class*="new_chat_btn"] {
-    border: 1px solid #d1d5db !important;
-    background-color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background-color: transparent !important;
     margin-bottom: 1rem !important;
     font-weight: 500 !important;
     border-radius: 10px !important;
-    color: #374151 !important;
+    color: #e5e7eb !important;
 }
 [data-testid="stSidebar"] .stButton button[class*="new_chat_btn"]:hover {
-    background-color: #f9fafb !important;
-    border-color: #9ca3af !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
 }
 /* Settings / nav buttons */
 [data-testid="stSidebar"] .stButton button[class*="settings_nav_btn"],
 [data-testid="stSidebar"] .stButton button[class*="chat_nav_btn"] {
-    border: 1px solid #d1d5db !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 10px !important;
-    color: #6b7280 !important;
+    color: #9ca3af !important;
     font-size: 13px !important;
     margin-top: 0.25rem !important;
-    background-color: #ffffff !important;
+    background-color: transparent !important;
 }
 [data-testid="stSidebar"] .stButton button[class*="settings_nav_btn"]:hover,
 [data-testid="stSidebar"] .stButton button[class*="chat_nav_btn"]:hover {
-    background-color: #f3f4f6 !important;
-    color: #111827 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
 }
 
-/* ── Chat Messages ───────────────────────── */
+/* ── Chat Messages (Slack Style UI) ───────────────────────── */
 .stChatMessage, [data-testid="stChatMessage"] {
     background-color: transparent !important;
     border: none !important;
     border-bottom: none !important;
-    padding: 1.25rem 0 !important;
-    margin: 0 !important;
-    gap: 1rem !important;
+    padding: 10px 16px !important;
+    margin: 2px 0 !important;
+    gap: 12px !important;
+    border-radius: 0 !important;
+    transition: background-color 0.1s ease !important;
+}
+.stChatMessage:hover, [data-testid="stChatMessage"]:hover {
+    background-color: #f8f9fa !important;
 }
 .stChatMessage:has(div[class*="st-key-user_msg"]),
 [data-testid="stChatMessage"]:has(div[class*="st-key-user_msg"]) {
     flex-direction: row !important;
 }
 
-/* User message – subtle gray bubble */
+/* User message – flat text */
 div[class*="st-key-user_msg"] {
-    background-color: #e9eaec !important;
-    color: #1a1a1a !important;
-    padding: 12px 18px !important;
-    border-radius: 20px !important;
-    max-width: 85% !important;
+    background-color: transparent !important;
+    color: #1d1c1d !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: auto !important;
     border: none !important;
     text-align: left !important;
-    line-height: 1.6 !important;
+    line-height: 1.5 !important;
+    font-size: 15px !important;
 }
 
-/* Assistant message – clean text */
+/* Assistant message – flat text */
 div[class*="st-key-assistant_msg"] {
     background-color: transparent !important;
-    color: #374151 !important;
-    padding: 4px 0px !important;
+    color: #1d1c1d !important;
+    padding: 0 !important;
     max-width: 100% !important;
     margin-left: 0 !important;
-    line-height: 1.7 !important;
+    line-height: 1.5 !important;
+    font-size: 15px !important;
 }
 
-/* Avatars */
+/* Avatars - Slack Style (Rounded Square) */
 [data-testid="stChatMessage"] [data-testid="stAvatar"] {
-    background-color: #f3f4f6 !important;
-    border-radius: 50% !important;
-    border: 1px solid #e5e7eb !important;
-    width: 32px !important;
-    height: 32px !important;
+    background-color: #e5e7eb !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+    width: 36px !important;
+    height: 36px !important;
 }
 
 /* ── Chat Input ──────────────────────────── */
@@ -417,24 +458,25 @@ div[class*="st-key-assistant_msg"] {
 /* ── Suggestion Cards ────────────────────── */
 .stButton button {
     background-color: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 14px !important;
-    padding: 16px 20px !important;
-    color: #374151 !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-radius: 16px !important;
+    padding: 20px 24px !important;
+    color: #111827 !important;
     text-align: left !important;
-    transition: all 0.15s ease !important;
-    font-size: 14px !important;
-    font-weight: 400 !important;
-    min-height: 64px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    min-height: 80px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02) !important;
     line-height: 1.5 !important;
+    display: flex !important;
+    align-items: center !important;
 }
 .stButton button:hover {
-    background-color: #f9fafb !important;
-    border-color: #1a1a1a !important;
-    color: #111827 !important;
-    transform: none !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    background-color: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* ── Settings Page ───────────────────────── */
@@ -476,22 +518,23 @@ div[class*="st-key-assistant_msg"] {
 
 /* ── Citation pills ──────────────────────── */
 .citation-pill {
-    background-color: #f0fdf4 !important;
-    color: #16a34a !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    padding: 2px 7px !important;
-    margin: 0 2px !important;
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    border-radius: 12px !important;
+    font-size: 11.5px !important;
+    padding: 3px 8px !important;
+    margin: 0 3px !important;
     cursor: pointer !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     display: inline-block !important;
     vertical-align: middle !important;
-    border: 1px solid #bbf7d0 !important;
+    border: 1px solid #e5e7eb !important;
+    text-decoration: none !important;
     transition: all 0.15s ease !important;
 }
 .citation-pill:hover {
-    background-color: #dcfce7 !important;
-    color: #15803d !important;
+    background-color: #e5e7eb !important;
+    color: #111827 !important;
 }
 
 /* ── Scrollbar ───────────────────────────── */
@@ -611,6 +654,7 @@ KNOWLEDGE SOURCE
 GROUNDING & CITATION RULES
 - Every substantive claim must trace to the retrieved excerpts.
 - Cite your sources inline using numerical bracket markers corresponding to the context number (e.g. [1], [2]). Do not use literal text like [document name, p.X].
+- IMPORTANT: Do NOT use brackets like [1] or [2] for standard numbered lists or bullet points. Use standard markdown numbering (1., 2., 3.) or bullet points (-, *) for lists. ONLY use [1], [2] for actual source citations!
 - If the retrieved context does not contain the answer, state clearly: "I don't have
   that in the indexed documents," then suggest where the user might look or what to
   add to the library. Never fabricate citations, page numbers, or requirements.
@@ -685,7 +729,7 @@ st.session_state.messages = current_chat["messages"]
 
 with st.sidebar:
     # App logo / brand
-    st.markdown('<div style="padding: 0 0 1rem 2px;"><span style="font-size: 22px;">✦</span> <span style="font-size: 16px; font-weight: 600; color: #1a1a1a; vertical-align: middle;">AI Assistant</span></div>', unsafe_allow_html=True)
+    st.markdown('<div style="padding: 0 0 1rem 2px;"><span style="font-size: 22px;">✦</span> <span style="font-size: 16px; font-weight: 600; color: #1a1a1a; vertical-align: middle;">AI ChatGPT for CMS-0057F for HealthPlans</span></div>', unsafe_allow_html=True)
     
     if st.button("＋  New chat", key="new_chat_btn", use_container_width=True):
         import uuid
@@ -717,6 +761,8 @@ with st.sidebar:
             st.rerun()
 
 
+    st.markdown("<br>" * 15, unsafe_allow_html=True)
+    
     if st.session_state.active_page != "settings":
         if st.button("⚙  Settings", use_container_width=True, key="settings_nav_btn"):
             st.session_state.active_page = "settings"
@@ -892,8 +938,7 @@ elif st.session_state.active_page == "graph":
 # Chat Interface (Main)
 # -----------------------------
 elif st.session_state.active_page == "chat":
-    # Minimal model badge at top of chat
-    st.markdown(f'<div style="text-align: center; padding: 0.25rem 0 0.75rem 0;"><span style="font-size: 14px; font-weight: 600; color: #374151;">{st.session_state.model}</span> <span style="font-size: 12px; color: #9ca3af;">· {st.session_state.temperature} temp</span></div>', unsafe_allow_html=True)
+
 
     # -----------------------------
     # Show Chat History
@@ -916,14 +961,12 @@ elif st.session_state.active_page == "chat":
                     
                 if followups:
                     st.write("")
-                    num_followups = len(followups)
-                    spacer_weight = max(1, 4 - num_followups)
-                    cols = st.columns([spacer_weight] + [1.5] * num_followups)
-                    
-                    for idx, q in enumerate(followups):
-                        if cols[idx+1].button(f"{q} ↗", key=f"hist_followup_{i}_{idx}", use_container_width=True, type="tertiary"):
-                            st.session_state.messages.append({"role": "user", "content": q})
-                            st.rerun()
+                    col1, col2 = st.columns([0.25, 0.75])
+                    with col2:
+                        for idx, q in enumerate(followups):
+                            if st.button(f"{q} ↗", key=f"hist_followup_{i}_{idx}", use_container_width=True, type="tertiary"):
+                                st.session_state.messages.append({"role": "user", "content": q})
+                                st.rerun()
 
     # -----------------------------
     # Chat Input
@@ -943,31 +986,31 @@ elif st.session_state.active_page == "chat":
         st.markdown("""
         <div style="text-align: center; margin-top: 6rem; margin-bottom: 2.5rem;">
             <div style="font-size: 32px; margin-bottom: 12px;">✦</div>
-            <div style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px;">What can I help with?</div>
+            <div style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px;">AI Assistant for CMS-0057F for HealthPlans <br/>What can I help with?</div>
             <div style="font-size: 14px; color: #9ca3af;">Ask a question about your documents or anything else.</div>
         </div>
         """, unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("📋  Explain CMS-0057F PA\nInteroperability requirements", use_container_width=True):
+            if st.button("Explain CMS-0057F PA\nInteroperability requirements", use_container_width=True):
                 prompt = "What is CMS-0057F PA Interoperability?"
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
-            if st.button("✉️  What is Consent management requirements for CMS-0057F?", use_container_width=True):
+            if st.button("What is Consent management requirements for CMS-0057F?", use_container_width=True):
                 prompt = "What is Consent management requirements for CMS-0057F?"
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
         with col2:
-            if st.button("💡  What are specifications for Patient API and Provider API?", use_container_width=True):
+            if st.button("What are specifications for Patient API and Provider API?", use_container_width=True):
                 prompt = "What are specifications for Patient API and Provider API?"
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
-            if st.button("🐍  Write a Python function\nto safely parse JSON", use_container_width=True):
-                prompt = "Write a Python function to parse JSON safely"
+            if st.button("Develop an implementation plan for CMS-0057F for HealthPlans for both Consumer and Provider side ", use_container_width=True):
+                prompt = "Develop an implementation plan for CMS-0057F for HealthPlans for both Consumer and Provider side. List implementation plan for Utilization Management and Information Technology departments in 5 bullets each."
                 st.session_state.chats[st.session_state.current_chat_id]["title"] = prompt[:30] + "..." if len(prompt) > 30 else prompt
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 st.rerun()
@@ -976,7 +1019,14 @@ elif st.session_state.active_page == "chat":
     # Generate Assistant Response
     # -----------------------------
     if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
-        sys_prompt = st.session_state.system_prompt + "\n\nCRITICAL INSTRUCTION: At the very end of your response, you MUST provide 1 to 3 suggested follow-up questions that the user could ask next. Format each question on a new line starting exactly with '[FOLLOWUP] '."
+        sys_prompt = st.session_state.system_prompt + (
+            "\n\nCRITICAL INSTRUCTION: At the very end of your response, you MUST provide "
+            "exactly 3 suggested follow-up questions that are highly contextual to the prompt. "
+            "Format each question on a new line starting exactly with '[FOLLOWUP] '.\n\n"
+            "CRITICAL INSTRUCTION: Do NOT use brackets like [1] or [2] for standard numbered "
+            "lists or bullet points. Use standard markdown (1., 2., 3.) for lists. ONLY use "
+            "[1] style brackets for actual source citations. List source citations in [1]."
+        )
         messages_for_ollama = [{"role": "system", "content": sys_prompt}]
         retrieved_sources = []
         
