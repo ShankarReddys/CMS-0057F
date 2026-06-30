@@ -155,7 +155,7 @@ def render_obsidian_graph():
     agraph(nodes=nodes, edges=edges, config=config)
 
 
-def render_citations(text, sources):
+def render_citations(text, sources, msg_id=0):
     if not sources:
         return text
         
@@ -168,8 +168,8 @@ def render_citations(text, sources):
         if len(short_name) > 18:
             short_name = short_name[:15] + "..."
             
-        # Use native markdown instead of HTML for inline citations
-        pill = f"**[[{idx+1}] 📄 {short_name}]**"
+        # Use HTML for inline citations so they are clickable
+        pill = f'<a href="#source-{msg_id}-{idx+1}" class="citation-pill" title="Page {src["page"]}">[{idx+1}] - {short_name}</a>'
         text = pattern.sub(pill, text)
         
     return text
@@ -184,6 +184,7 @@ def display_sources_ui(sources, msg_id=0):
     unique_suffix = "\u200b" * msg_id if isinstance(msg_id, int) else "\u200b\u200b\u200b\u200b\u200b"
     
     for idx, src in enumerate(sources):
+        st.html(f"<div id='source-{msg_id}-{idx+1}'></div>")
         with st.expander(f"[{idx+1}] 📄 {src['filename']} (Page {src['page']}){unique_suffix}"):
             safe_text = src['text'][:400].replace('\n', ' ')
             st.caption(f"_{safe_text}..._")
@@ -227,10 +228,10 @@ st.markdown("""
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-html, body, [class*="css"], [class*="st-key"], .stMarkdown, p, div, span,
+html, body, [class*="css"], [class*="st-key"], .stMarkdown, p,
 button, input, textarea, select, label {
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif !important;
-    -webkit-font-smoothing: antialiased !important;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Strip Streamlit chrome */
@@ -938,7 +939,7 @@ elif st.session_state.active_page == "chat":
                     display_content, followups = extract_followups(message["content"])
                     
                 if message["role"] == "assistant" and "sources" in message and message["sources"]:
-                    rendered_text = render_citations(display_content, message["sources"])
+                    rendered_text = render_citations(display_content, message["sources"], msg_id=i)
                     st.markdown(rendered_text, unsafe_allow_html=True)
                     display_sources_ui(message["sources"], msg_id=i)
                 else:
@@ -956,7 +957,7 @@ elif st.session_state.active_page == "chat":
     # -----------------------------
     # Chat Input
     # -----------------------------
-    user_prompt = st.chat_input("Message AI Assistant...")
+    user_prompt = st.chat_input("Chat with AI for CMS-0057F for Health Plans...")
 
     if user_prompt:
         if len(st.session_state.messages) == 0:
@@ -1071,14 +1072,14 @@ elif st.session_state.active_page == "chat":
                                     content = chunk["message"]["content"]
                                     full_response += content
                                     clean_temp, _ = extract_followups(full_response)
-                                    rendered_temp = render_citations(clean_temp, retrieved_sources)
+                                    rendered_temp = render_citations(clean_temp, retrieved_sources, msg_id="current")
                                     response_placeholder.markdown(rendered_temp + "▌", unsafe_allow_html=True)
 
                                 if chunk.get("done", False):
                                     break
 
                     clean_final, final_followups = extract_followups(full_response)
-                    response_placeholder.markdown(render_citations(clean_final, retrieved_sources), unsafe_allow_html=True)
+                    response_placeholder.markdown(render_citations(clean_final, retrieved_sources, msg_id="current"), unsafe_allow_html=True)
                     if retrieved_sources:
                         display_sources_ui(retrieved_sources, msg_id="current")
 

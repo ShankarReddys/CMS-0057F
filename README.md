@@ -10,10 +10,15 @@ This version runs entirely locally and does not require OpenAI API credits or ex
 ### Landing Page
 ![Landing Page](assets/landing_page.png)
 
-### Results Page with Sources
-![Results Page](assets/results_page.png)
+### Results Page with Sources (Consent Management)
+![Results Page - Consent Management](assets/results_page_consent.png)
 
 *The user interface dynamically renders markdown, collapsible source citations, and context-aware follow up questions.*
+
+### Interactive Follow-up Questions Demo
+![Interactive Demo](assets/interactive_demo.png)
+
+*Easily explore topics further using generated follow-up questions tailored to your chat history and the current context.*
 
 ## What is Ollama?
 Ollama allows you to run open-source LLMs locally on your own laptop.
