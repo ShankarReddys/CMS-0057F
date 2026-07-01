@@ -222,8 +222,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 /* =============================================
-   Clean Light UI — Card-based Design System
-   Inspired by modern AI tool onboarding UIs
+   Clean Modern UI — PTOGENIUS Style
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -240,112 +239,115 @@ footer { visibility: hidden !important; }
 [data-testid="stHeader"] { background-color: transparent !important; }
 [data-testid="stToolbar"] { display: none !important; }
 
-
-
 /* ── Main canvas ── */
 .stApp {
-    background-color: #f7f7f8 !important;
+    background-color: #F8F9FB !important;
 }
 .block-container {
     max-width: 52rem !important;
-    padding-top: 1rem !important;
+    padding-top: 2rem !important;
     padding-bottom: 7rem !important;
 }
 
 /* ── Sidebar ─────────────────────────────── */
 [data-testid="stSidebar"] {
-    background-color: #111216 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 2px 0 16px rgba(0,0,0,0.3) !important;
+    background-color: #13141B !important;
+    border-right: none !important;
+    box-shadow: 2px 0 24px rgba(0,0,0,0.1) !important;
 }
 [data-testid="stSidebar"],
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] div,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label {
-    color: #d1d5db !important;
+    color: #A0AEC0 !important;
 }
 [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
-    padding-top: 1.25rem !important;
+    padding-top: 1.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
 }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: #8b949e !important;
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] .stMarkdown h3 {
+    color: #718096 !important;
     font-size: 11px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.08em !important;
-    margin-bottom: 0.4rem !important;
+    margin-bottom: 0.5rem !important;
+    margin-top: 1.5rem !important;
+    padding-left: 10px !important;
 }
 [data-testid="stSidebar"] .stMarkdown p {
-    color: #9ca3af !important;
+    color: #A0AEC0 !important;
     font-size: 13px !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    margin: 0.75rem 0 !important;
+    display: none !important;
 }
 
 /* Sidebar buttons – clean flat rows */
 [data-testid="stSidebar"] .stButton button {
     background-color: transparent !important;
-    color: #d1d5db !important;
+    color: #A0AEC0 !important;
     border: none !important;
-    padding: 10px 14px !important;
+    padding: 12px 16px !important;
     text-align: left !important;
     justify-content: flex-start !important;
     font-size: 14px !important;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
     min-height: auto !important;
     box-shadow: none !important;
-    border-radius: 10px !important;
-    margin-bottom: 2px !important;
+    border-radius: 12px !important;
+    margin-bottom: 4px !important;
     width: 100% !important;
     transform: none !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
+    transition: all 0.2s ease !important;
     line-height: 1.4 !important;
 }
 [data-testid="stSidebar"] .stButton button:hover {
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    color: #E2E8F0 !important;
     transform: none !important;
 }
-/* Active chat row */
+/* Active chat row (PTOGENIUS pill style) */
 [data-testid="stSidebar"] .stButton button[kind="primary"],
 [data-testid="stSidebar"] .stButton button[data-testid*="primary"] {
-    background-color: rgba(255, 255, 255, 0.12) !important;
-    color: #ffffff !important;
+    background-color: #26272E !important;
+    color: #FFFFFF !important;
     font-weight: 600 !important;
 }
 /* New-Chat button */
 [data-testid="stSidebar"] .stButton button[class*="new_chat_btn"] {
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    background-color: transparent !important;
-    margin-bottom: 1rem !important;
-    font-weight: 500 !important;
-    border-radius: 10px !important;
-    color: #e5e7eb !important;
+    background-color: #7A5AF8 !important;
+    color: #ffffff !important;
+    border: none !important;
+    margin-bottom: 1.5rem !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(122, 90, 248, 0.2) !important;
 }
 [data-testid="stSidebar"] .stButton button[class*="new_chat_btn"]:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    background-color: #6941C6 !important;
+    box-shadow: 0 6px 16px rgba(122, 90, 248, 0.3) !important;
     color: #ffffff !important;
 }
 /* Settings / nav buttons */
 [data-testid="stSidebar"] .stButton button[class*="settings_nav_btn"],
 [data-testid="stSidebar"] .stButton button[class*="chat_nav_btn"] {
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-    color: #9ca3af !important;
-    font-size: 13px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #A0AEC0 !important;
+    font-size: 14px !important;
     margin-top: 0.25rem !important;
     background-color: transparent !important;
 }
 [data-testid="stSidebar"] .stButton button[class*="settings_nav_btn"]:hover,
 [data-testid="stSidebar"] .stButton button[class*="chat_nav_btn"]:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    color: #FFFFFF !important;
 }
 
 /* ── Chat Messages (Slack Style UI) ───────────────────────── */
@@ -355,12 +357,8 @@ footer { visibility: hidden !important; }
     border-bottom: none !important;
     padding: 10px 16px !important;
     margin: 2px 0 !important;
-    gap: 12px !important;
+    gap: 16px !important;
     border-radius: 0 !important;
-    transition: background-color 0.1s ease !important;
-}
-.stChatMessage:hover, [data-testid="stChatMessage"]:hover {
-    background-color: #f8f9fa !important;
 }
 .stChatMessage:has(div[class*="st-key-user_msg"]),
 [data-testid="stChatMessage"]:has(div[class*="st-key-user_msg"]) {
@@ -370,7 +368,7 @@ footer { visibility: hidden !important; }
 /* User message – flat text */
 div[class*="st-key-user_msg"] {
     background-color: transparent !important;
-    color: #1d1c1d !important;
+    color: #111827 !important;
     padding: 0 !important;
     border-radius: 0 !important;
     max-width: 100% !important;
@@ -378,211 +376,221 @@ div[class*="st-key-user_msg"] {
     margin-right: auto !important;
     border: none !important;
     text-align: left !important;
-    line-height: 1.5 !important;
+    line-height: 1.6 !important;
     font-size: 15px !important;
 }
 
 /* Assistant message – flat text */
 div[class*="st-key-assistant_msg"] {
     background-color: transparent !important;
-    color: #1d1c1d !important;
+    color: #111827 !important;
     padding: 0 !important;
     max-width: 100% !important;
     margin-left: 0 !important;
-    line-height: 1.5 !important;
+    line-height: 1.6 !important;
     font-size: 15px !important;
 }
 
-/* Avatars - Slack Style (Rounded Square) */
+/* Avatars - Modern Rounded */
 [data-testid="stChatMessage"] [data-testid="stAvatar"] {
-    background-color: #e5e7eb !important;
-    border-radius: 6px !important;
-    border: 1px solid rgba(0,0,0,0.05) !important;
-    width: 36px !important;
-    height: 36px !important;
+    background-color: #E2E8F0 !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
 }
 
 /* ── Chat Input ──────────────────────────── */
 [data-testid="stChatInputContainer"] {
     background-color: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 26px !important;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06) !important;
-    padding: 4px 12px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 30px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04) !important;
+    padding: 6px 16px !important;
     max-width: 52rem !important;
     margin: 0 auto !important;
 }
 [data-testid="stChatInputContainer"]:focus-within {
-    border-color: #9ca3af !important;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.1) !important;
+    border-color: #7A5AF8 !important;
+    box-shadow: 0 8px 30px rgba(122, 90, 248, 0.08) !important;
 }
 [data-testid="stChatInput"] textarea {
-    color: #1a1a1a !important;
+    color: #111827 !important;
     background-color: transparent !important;
     border: none !important;
     font-size: 15px !important;
 }
 [data-testid="stChatInput"] textarea::placeholder {
-    color: #9ca3af !important;
+    color: #9CA3AF !important;
 }
 /* Send button */
 [data-testid="stChatInputContainer"] button {
-    background-color: #1a1a1a !important;
+    background-color: #7A5AF8 !important;
     border: none !important;
     border-radius: 50% !important;
     color: #fff !important;
     min-height: auto !important;
-    box-shadow: none !important;
-    padding: 6px !important;
+    box-shadow: 0 2px 8px rgba(122, 90, 248, 0.2) !important;
+    padding: 8px !important;
+    transition: all 0.2s ease !important;
 }
 [data-testid="stChatInputContainer"] button:hover {
-    background-color: #374151 !important;
-    transform: none !important;
+    background-color: #6941C6 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(122, 90, 248, 0.3) !important;
 }
 
 /* ── Suggestion Cards ────────────────────── */
 .stButton button {
     background-color: #ffffff !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    border-radius: 16px !important;
-    padding: 20px 24px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
     color: #111827 !important;
     text-align: left !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     font-size: 15px !important;
     font-weight: 500 !important;
-    min-height: 80px !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02) !important;
+    min-height: 90px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
     line-height: 1.5 !important;
     display: flex !important;
     align-items: center !important;
 }
 .stButton button:hover {
     background-color: #ffffff !important;
-    border-color: rgba(0, 0, 0, 0.15) !important;
+    border-color: #7A5AF8 !important;
     transform: translateY(-4px) !important;
-    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 16px 32px rgba(122, 90, 248, 0.06) !important;
 }
 
-/* ── Settings Page ───────────────────────── */
+/* ── Settings Page / Controls ────────────── */
 .stSelectbox label, .stSlider label, .stTextArea label, .stCheckbox label {
-    color: #374151 !important;
+    color: #4A5568 !important;
     font-weight: 500 !important;
     font-size: 14px !important;
 }
 .stSelectbox [data-testid="stSelectbox"] > div {
     background-color: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 10px !important;
-    color: #1a1a1a !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    color: #111827 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
 }
 .stTextArea textarea {
     background-color: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 10px !important;
-    color: #1a1a1a !important;
-    font-size: 13px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    color: #111827 !important;
+    font-size: 14px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
 }
 .stCheckbox label span {
-    color: #374151 !important;
+    color: #4A5568 !important;
 }
 .stSlider [data-testid="stSlider"] {
-    color: #1a1a1a !important;
+    color: #7A5AF8 !important;
 }
 
 /* Expander / Sources */
 .streamlit-expanderHeader {
-    color: #6b7280 !important;
-    font-size: 13px !important;
+    color: #718096 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
 }
 [data-testid="stExpander"] {
-    border: 1px solid #e5e7eb !important;
-    border-radius: 10px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
     background-color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important;
 }
 
 /* ── Citation pills ──────────────────────── */
 .citation-pill {
-    background-color: #f3f4f6 !important;
-    color: #374151 !important;
+    background-color: #F7FAFC !important;
+    color: #4A5568 !important;
     border-radius: 12px !important;
-    font-size: 11.5px !important;
-    padding: 3px 8px !important;
+    font-size: 12px !important;
+    padding: 4px 10px !important;
     margin: 0 3px !important;
     cursor: pointer !important;
     font-weight: 500 !important;
     display: inline-block !important;
     vertical-align: middle !important;
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid #E2E8F0 !important;
     text-decoration: none !important;
-    transition: all 0.15s ease !important;
+    transition: all 0.2s ease !important;
 }
 .citation-pill:hover {
-    background-color: #e5e7eb !important;
-    color: #111827 !important;
+    background-color: #EDF2F7 !important;
+    color: #7A5AF8 !important;
+    border-color: #7A5AF8 !important;
 }
 
 /* ── Scrollbar ───────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #A0AEC0; }
 
 /* ── Misc ─────────────────────────────────── */
 .stCaption, [data-testid="stCaption"] {
-    color: #9ca3af !important;
+    color: #A0AEC0 !important;
 }
-a { color: #2563eb !important; }
-a:hover { color: #1d4ed8 !important; }
+a { color: #7A5AF8 !important; }
+a:hover { color: #6941C6 !important; }
 
 /* ── Model cards (settings page) ─────────── */
 .model-card {
     background: #ffffff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 20px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
 }
 .model-card:hover {
-    border-color: #1a1a1a;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border-color: #7A5AF8;
+    box-shadow: 0 8px 24px rgba(122, 90, 248, 0.08);
+    transform: translateY(-2px);
 }
 .model-card.selected {
-    border-color: #1a1a1a;
-    box-shadow: 0 0 0 1px #1a1a1a;
+    border-color: #7A5AF8;
+    box-shadow: 0 0 0 1px #7A5AF8, 0 8px 24px rgba(122, 90, 248, 0.1);
 }
 .model-card .check {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    right: 16px;
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 1.5px solid #d1d5db;
+    border: 1.5px solid #CBD5E0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     color: transparent;
+    transition: all 0.2s ease;
 }
 .model-card.selected .check {
-    background-color: #1a1a1a;
-    border-color: #1a1a1a;
+    background-color: #7A5AF8;
+    border-color: #7A5AF8;
     color: #ffffff;
 }
 .model-card .model-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #111827;
     margin-top: 8px;
 }
 .model-card .model-desc {
-    font-size: 13px;
-    color: #6b7280;
-    margin-top: 4px;
-    line-height: 1.4;
+    font-size: 14px;
+    color: #718096;
+    margin-top: 6px;
+    line-height: 1.5;
 }
 
 </style>
@@ -714,7 +722,7 @@ st.session_state.messages = current_chat["messages"]
 
 with st.sidebar:
     # App logo / brand
-    st.markdown('<div style="padding: 0 0 1rem 2px;"><span style="font-size: 22px;">✦</span> <span style="font-size: 16px; font-weight: 600; color: #1a1a1a; vertical-align: middle;">AI ChatGPT for CMS-0057F for HealthPlans</span></div>', unsafe_allow_html=True)
+    st.markdown('<div style="padding: 0 0 1rem 2px; display: flex; align-items: center; gap: 10px;"><div style="background: linear-gradient(135deg, #7A5AF8 0%, #3B82F6 100%); border-radius: 8px; width: 32px; height: 32px; min-width: 32px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 2px 8px rgba(122, 90, 248, 0.3);">C</div><span style="font-size: 16px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.2px; line-height: 1.2;">CMS-0057F<br><span style="font-size: 12px; font-weight: 500; color: #A0AEC0;">AI Assistant</span></span></div>', unsafe_allow_html=True)
     
     if st.button("＋  New chat", key="new_chat_btn", use_container_width=True):
         import uuid
